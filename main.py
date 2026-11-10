@@ -374,27 +374,19 @@ class ForwardPlugin(Star):
         self, event: AstrMessageEvent, source: str = "quoted", scope: str = "all",
         group_ids: str = ""
     ) -> str:
-        """把消息转发到其他群。仅当用户明确要求「转发 / 分享 / 广播到别处」时才调用。
-
-        **source 怎么选（最要紧）**：用户通常是「先引用一条消息，再说'帮我转发到 X 群'」，
-        这时要转的是**被引用的那条**，必须用 source="quoted"（默认值）。
-        只有用户明确要发「我这句话本身」、且消息里没有引用时，才用 source="current"。
-        **千万不要把用户那句指令本身（如"帮我发到山根王国"）当内容转发出去。**
-
-        group_ids 只接受群号。若用户说的是群名（如"哲学群"），
-        必须先用 list_forward_targets 查到对应群号，再填进来；不要直接填群名，也不要编造群号。
-        不确定用户指哪个群时，先问清楚。
-        不要转发广告、刷屏或违法内容。同一内容在去重窗口内只会成功一次，
-        重复调用返回 duplicate_payload 属正常；被频次或内容规则拦下时也在回执里说明原因。
-        本工具只返回执行结果给你（不会直接发消息到群里），请据此用自己的话回复用户。
+        """【工具是什么】：群消息跨群转发与广播投递工具。
+        【功能】：提取当前会话中的引用消息或当前消息本身，转发投递至指定的目标群聊。
+        【返回状态】：目标群投递详情（包含已投递成功群列表、不可投递阻断原因、去重指纹状态）。
+        【最小例子】：
+        - forward_message(source="quoted", scope="all")：将引用的消息广播到所有可投递群
+        - forward_message(source="quoted", scope="only", group_ids="1017786877")：将引用的消息转发到指定群
+        - forward_message(source="current", scope="only", group_ids="1017786877")：将当前消息内容转发到指定群
+        - forward_message(source="quoted", scope="except", group_ids="1073672548")：广播到除指定群外的所有群
 
         Args:
-            source(string): 转发哪条消息。默认 "quoted"=被引用的那条（用户先引用、再让你转发时用这个）；"current"=当前这条消息本身（仅在用户说"把这条/我这句话发出去"且消息里没有引用时用）。
-            scope(string): 目标策略，四选一。"all"=所有可投群；"only"=只发 group_ids 里列的群；"except"=发所有可投群但排除 group_ids 里列的群；"here"=只发本群。
-            group_ids(string): 群号，多个用逗号分隔，例如 "1017786877,1073672548"。scope 为 "only" 或 "except" 时必填。只填数字群号，不要填群名。
-
-        Returns:
-            执行结果的 JSON 字符串（含 ok / message 等字段），供你组织回复，不会直接发给用户。
+            source(string): 转发内容源。默认 "quoted"=被引用的消息；"current"=当前消息本身
+            scope(string): 目标投递策略。"all"=所有可投群；"only"=仅发送到 group_ids 列出的群；"except"=发往所有可投群但排除 group_ids；"here"=仅发本群
+            group_ids(string): 目标数字群号，多个用逗号分隔（如 "1017786877,1073672548"），scope 为 "only" 或 "except" 时必填
         """
         if not bool(self._get("enable_llm_tool", True)):
             return self._reject(E_DISABLED)
@@ -402,15 +394,11 @@ class ForwardPlugin(Star):
 
     @filter.llm_tool(name="list_forward_targets")
     async def list_forward_targets(self, event: AstrMessageEvent) -> str:
-        """实时读取「群名 ↔ 群号」对照表。
-
-        当用户用群名（如"哲学群"）而不是群号指定目标时，**先调用本工具查表**，
-        再把查到的群号填进 forward_message 的 group_ids。
-        available=false 的群当前不可投递（reason 说明原因）。
-        本工具只把表返回给你（不会直接发消息到群里），请据此用自己的话回复用户。
-
-        Returns:
-            群表 JSON 字符串（groups 数组含 id / name / available / reason）。
+        """【工具是什么】：机器人所在群聊列表与投递状态查询工具。
+        【功能】：读取当前机器人所在的所有群聊名称、数字群号及当前是否满足投递条件（available 及阻断原因 reason）。
+        【返回状态】：群聊总数、当前可用群数、群列表 JSON（包含群号 id、群名 name、可用性 available、阻断原因 reason）。
+        【最小例子】：
+        - list_forward_targets()：获取群名与群号对照表及各群可用状态
         """
         try:
             all_groups, reachable, blocked = await self._snapshot(event)
