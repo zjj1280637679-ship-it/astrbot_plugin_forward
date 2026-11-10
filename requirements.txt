@@ -1,0 +1,2 @@
+# astrbot_plugin_forward requirements
+# Zero external dependencies: uses AstrBot core and Python standard library

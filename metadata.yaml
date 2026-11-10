@@ -1,0 +1,16 @@
+name: astrbot_plugin_forward
+display_name: "AI 转发"
+desc: "把被引用的消息（文字 / 图片 / 分享卡片，如 B 站分享）转发到指定群或全部群。支持 全体/白名单/黑名单/本群 四种策略：AI 先查实时的「群名↔群号」对照表，再用群号调用转发。工具结果只回给 AI，由 AI 用自己的话回复（不刷硬回执）。转发永不自动发生；带去重、血缘深度、频次与内容拦截。零密钥。"
+short_desc: "AI 查群名群号表后转发引用消息，支持全体/白名单/黑名单"
+version: "1.0.0"
+astrbot_version: ">=4.26.7"
+author: "羊膜大人"
+repo: "https://github.com/zjj1280637679-ship-it/astrbot_plugin_forward"
+support_platforms:
+  - aiocqhttp
+tags:
+  - 转发
+  - 广播
+  - LLM 工具
+  - 防循环
+social_link: "https://github.com/zjj1280637679-ship-it"

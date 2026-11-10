@@ -1,0 +1,99 @@
+{
+  "enabled": {
+    "type": "bool",
+    "default": true,
+    "description": "插件总开关"
+  },
+  "enable_llm_tool": {
+    "type": "bool",
+    "default": true,
+    "description": "是否注册 forward_message / list_forward_targets 工具（G6）"
+  },
+  "enable_command": {
+    "type": "bool",
+    "default": true,
+    "description": "是否注册 /转发 命令（G6）"
+  },
+  "admin_only_broadcast": {
+    "type": "bool",
+    "default": true,
+    "description": "scope=all 时是否强制管理员（G6）"
+  },
+  "broadcast_scope": {
+    "type": "string",
+    "default": "allowlist",
+    "description": "配置层目标范围：allowlist=只允许广播到 group_allowlist 中的群（默认，最保守）；all=机器人加入的全部群（减黑名单）",
+    "hint": "这是管理员的长期护栏；请求级 scope(only/except) 只能在其中再收窄，不能突破"
+  },
+  "group_allowlist": {
+    "type": "list",
+    "default": [],
+    "description": "配置层白名单。broadcast_scope=allowlist 时生效；为空则该模式下无目标"
+  },
+  "group_denylist": {
+    "type": "list",
+    "default": [],
+    "description": "配置层黑名单（两种 scope 下都生效，优先级最高）"
+  },
+  "max_fanout": {
+    "type": "int",
+    "default": 20,
+    "description": "单次广播的最大群数（G4 / 不变式 I5）"
+  },
+  "max_hop": {
+    "type": "int",
+    "default": 1,
+    "description": "血缘深度上限（G8 / 不变式 I7）。1=同一内容只允许被转发一次，防转发链"
+  },
+  "send_interval_ms": {
+    "type": "int",
+    "default": 800,
+    "description": "逐群投递间隔（毫秒），全局串行（T3 节流）"
+  },
+  "broadcast_cooldown_seconds": {
+    "type": "int",
+    "default": 60,
+    "description": "两次广播之间的最小冷却秒数（G3 / 不变式 I6）"
+  },
+  "dedup_ttl_seconds": {
+    "type": "int",
+    "default": 600,
+    "description": "去重窗口秒数（G2 / 不变式 I2 / 定理 T1），须大于最大重投递窗口"
+  },
+  "per_send_timeout_seconds": {
+    "type": "int",
+    "default": 15,
+    "description": "单个目标群的投递超时秒数（定理 T2a 的时间上界）"
+  },
+  "sender_window_seconds": {
+    "type": "int",
+    "default": 60,
+    "description": "单用户频次窗口秒数（0=关闭单用户限流）"
+  },
+  "sender_max_in_window": {
+    "type": "int",
+    "default": 3,
+    "description": "单用户在窗口内最多请求转发几次，超出回 sender_flooding"
+  },
+  "content_deny_keywords": {
+    "type": "list",
+    "default": [],
+    "description": "内容拦截关键词（命中即拒，回 content_blocked）。留空=不按关键词拦",
+    "hint": "这是规则层拦截，不是语义审核：能挡明显广告刷屏，挡不住措辞委婉的违规内容"
+  },
+  "content_max_urls": {
+    "type": "int",
+    "default": 3,
+    "description": "单条内容允许的最大链接数，超出即拒（疑似广告）；-1=关闭该检查"
+  },
+  "content_max_ats": {
+    "type": "int",
+    "default": 5,
+    "description": "单条内容允许的最大 @ 人数，超出即拒；-1=关闭该检查"
+  },
+  "content_max_text_len": {
+    "type": "int",
+    "default": 2000,
+    "description": "单条内容允许的最大文本长度，超出即拒；-1=关闭该检查"
+  }
+}

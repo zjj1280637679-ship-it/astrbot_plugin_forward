@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+*$py.class
+_data/
+.pytest_cache/
+.coverage
